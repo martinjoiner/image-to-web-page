@@ -1,0 +1,164 @@
+
+body{
+	background-color: #000;
+	color: #DDD;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+body *{
+	line-height: 1.6em;
+	box-sizing: border-box;
+}
+
+
+h1, h2{
+	font-weight: normal;
+}
+
+h1{
+	font-size: 3em;
+	letter-spacing: -2px;
+	margin: 20px 0 10px 0;
+}
+
+h3{
+	margin: 1em 0 0.5em 0;
+}
+
+p{
+	margin: 0 0 1em 0;
+}
+
+a{
+	color: #EEE;
+}
+
+a:hover{
+	color: darkred;
+}
+
+.btn{
+	display: inline-block;
+	background-color: grey;
+	padding: 0.4em;
+}
+
+
+
+
+/* ------- Boilerplate for generated images --------- */
+
+#wrapper{
+	margin: 20px auto;
+}
+
+.p, 
+#wrapper i, 
+#wrapper p{
+	font-style: normal;
+	float: left;
+	font-weight: bold;
+	width: 10px;
+	height: 10px;
+	font-size: 10px;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+
+
+
+/* ----------------- Grid Layout ------------------- */
+
+.row{
+	float: left;
+	width: 100%;
+}
+
+.col-4,
+.col-half,
+.col-5,
+.col-6{
+	float: left;
+	padding: 0 0.8em;
+}
+
+.col-4{
+	width: 40%;
+}
+
+.col-half,
+.col-5{
+	width: 50%;
+}
+
+.col-6{
+	width: 60%;
+}
+
+
+
+/* ----------------- Home page ------------------- */
+
+.screenShot{
+	float: right;
+	width: 100%;
+	max-width: 250px;
+}
+
+.introBlurb{
+	max-width: 380px;
+}
+
+ul.lstExamples{
+	padding-left: 0;
+}
+
+ul.lstExamples > li{
+	list-style: none;
+}
+
+
+
+
+/* --------------- Convert page ------------------- */
+
+.generateInputs label{
+	float: left;
+	margin-right: 10px;
+}
+
+input, select{
+	padding: 0.4em;
+}
+
+form .row{
+	margin-bottom: 10px;
+}
+
+
+/* ---------------------------------------------- */
+
+footer{
+	float: left;
+	width: 100%;
+	border-top: 1px solid #222;
+	margin-top: 2em;
+	padding: 1em 0;
+}
+
+.moreBSW{
+	
+	font-size: 0.8em;
+	color: #888;
+	font-style: italic;
+}
+
+.moreBSW a{
+	color: inherit;
+}
+
+.moreBSW a:hover{
+	color: #EEE;
+}

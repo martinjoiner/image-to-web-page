@@ -1,0 +1,13 @@
+
+<IfModule mod_rewrite.c>
+
+	RewriteEngine on
+
+	# Rewrite URLs of the form 'x' to the form 'rewrite.php?r=x'.
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_URI} !=/favicon.ico
+	RewriteRule ^(.*)$ ./rewrite.php?r=$1 [L,QSA]
+  
+</IfModule>
+
