@@ -2,32 +2,47 @@
 
 namespace ImageToWebPage;
 
-Class MarkupImage{
+use ImageToWebPage\Classifier;
 
-	var $strImageFilename = '';
-	var $numPosterise = 0;
-	var $strWording = '';
+Class Converter{
+
+
+	/**
+	 * The name of the source file
+	 */
+	private $originalFileName = '';
+
+	/**
+	 * Posterise determines how many groups we break colour spectrum into
+	 */
+	private $numPosterise = 0;
+
+	/**
+	 * The message that will be repeated in the web page
+	 */
+	private $strWording = '';
+
 	var $numDesiredWindowWidth = 0;
 	var $numPixelWidth = 0;
 
-	var $arrPixels;
-	var $arrClasses;
-	var $strCSS = '';
-	var $strHTML = '';
+	private $arrPixels = [];
+
+	private $classifier;
 
 
-	/** 
-	 Returns a string of CSS
-	*/
-	function __construct( $strImageFilename, $numPosterise, $strWording, $numDesiredWindowWidth, $numPixelWidth ){
 
-		$this->strImageFilename 		= $strImageFilename;
+	public function __construct( $strImageFilename, $numPosterise, $strWording, $numDesiredWindowWidth, $numPixelWidth ){
+
+		$this->classifier = new Classifier();
+
+		$this->originalFileName = end( explode('/', $strImageFilename) );
+
 		$this->numPosterise 			= $numPosterise;
 		$this->strWording 				= $strWording;
 		$this->numDesiredWindowWidth 	= $numDesiredWindowWidth;
 		$this->numPixelWidth 			= $numPixelWidth;
 
-		$absoluteFilename = $_SERVER['DOCUMENT_ROOT'] . '/sourceimages/' . $this->strImageFilename;
+		$absoluteFilename = $strImageFilename;
 
 		list($width, $height, $type, $attr) = getimagesize( $absoluteFilename );
 
@@ -119,17 +134,15 @@ Class MarkupImage{
 					$hexb = "0".$hexb;
 				
 				$skvPixel['col'] = $hexr . $hexg . $hexb;
-				$arrPixels[] = $skvPixel;
+				$this->arrPixels[] = $skvPixel;
 			}
 		}
 
 
-		$cnt = sizeof( $arrPixels );
+		$cnt = sizeof( $this->arrPixels );
 		for( $i = 0; $i < $cnt; $i++ ){
-			$arrPixels[$i]['class'] = $this->gimmeColClass( $arrPixels[$i]['col'] );
+			$this->arrPixels[$i]['class'] = $this->classifier->colorClass( $this->arrPixels[$i]['col'] );
 		}
-
-		$this->arrPixels = $arrPixels;
 
 		$this->numWindowWidth = $this->numPixelWidth * ceil($width / $averagerange);
 		$this->numWindowHeight = $this->numPixelWidth * ceil($height / $averagerange);
@@ -139,75 +152,12 @@ Class MarkupImage{
 
 
 
-	function getName(){
-		$name = preg_replace( '/\.jpg$/', '', $this->strImageFilename );
-		$name = preg_replace( '/-/', ' ', $name );
-		return trim($name);
-	}
-
-	function getFilename( $strExtension = 'html' ){
-		$name = preg_replace( '/\.jpg$/', '', $this->strImageFilename );
-		return $name . '.' . $strExtension;
-	}
-
-
-
-
 	/**
-	 Takes a hex colour as a parameter and returns a class name
-	 Returns an existing class with that colour if available, if not returns a new class
-	*/
-	function gimmeColClass( $strCol ){
-
-		if( is_array($this->arrClasses) ){
-			foreach( $this->arrClasses as $thisClass ){
-				if( $thisClass['col'] == $strCol ){
-					//print 'Class matched at ' . $thisClass['class'];
-					return $thisClass['class'];
-				}
-			}
-		}
-
-		// If the code has reached this point it means the class does not exist so create it
-		$cntClasses = sizeof( $this->arrClasses );
-		$this->arrClasses[$cntClasses]['col'] = $strCol;
-		$className = 'p' . $cntClasses;
-		$this->arrClasses[$cntClasses]['class'] = $className;
-
-
-//print 'Creating new class at ' . $cntClasses;
-		return $className;
-
-	}
-
-
-
-
-	/** 
-	 Returns a string of CSS
-	*/
-	function getCSS(){
-		$strCSS = '#wrapper p{
-			width: ' . $this->numPixelWidth . 'px;
-			height: ' . $this->numPixelWidth . 'px;
-			font-size: ' . $this->numPixelWidth . 'px;
-		}
-		';
-
-		foreach( $this->arrClasses as $thisClass ){
-			$strCSS .= '.' . $thisClass['class'] . '{color:#' . $thisClass['col'] . '} ';
-		}
-
-		return $strCSS;
-	}
-
-
-
-
-	/**
-	 Returns a string of markup
-	*/
-	function getHTML(){
+	 * Produces the HTML markup
+	 *
+	 * @returns {string} HTML markup for the page
+	 */
+	private function writeHTML(){
 		$strHTML = '<div id="wrapper" style="width: ' . $this->numWindowWidth . 'px; height: ' . $this->numWindowHeight . 'px;">';
 		$licount = 0;
 		for($i = 0; $i < sizeof($this->arrPixels); $i++){
@@ -222,6 +172,57 @@ Class MarkupImage{
 		}
 		$strHTML .= '</div>';
 		return $strHTML;
+	}
+
+
+
+	/**
+	 * Writes the complete source code for a static web page
+	 *
+	 * @return {string} The produced source code
+	 */
+	private function writeSourceCode(){
+		$sourceCode = '<!DOCTYPE html><html><head><style type="text/css">';
+		$sourceCode .= $this->classifier->writeCSS();
+		$sourceCode .= '</style></head><body><div class="wrapper">';
+		$sourceCode .= $this->writeHTML();
+		$sourceCode .= '</div></body></html>';
+		return $sourceCode;
+	}
+
+
+
+	/** 
+	 * Produces a filename for the HTML file based on the origin image
+	 *
+	 */
+	private function staticFilename(){
+		return preg_replace( '/(jpg|png)$/', 'html', $this->originalFileName );
+	}
+
+
+
+	/**
+	 * Writes a single static web page to disk
+	 *
+	 * @param {string} $destinationFolder Destination folder relative to document root
+	 */
+	public function writeStaticPage( $destinationFolder = '/generated/' ){
+		$report = [ 'success'=>true, 'message'=>'', 'address'=>'' ];
+
+		$fileContents = $this->writeSourceCode();
+
+		$report['address'] = $destinationFolder . $this->staticFilename();
+
+		$report['success'] = file_put_contents( $_SERVER['DOCUMENT_ROOT'] . $report['address'], $fileContents );
+
+		if( $report['success'] ){
+			$report['message'] =  'HTML file written';
+		} else {
+			$report['message'] =  'Failed to write HTML file';
+		}
+
+		return $report;
 	}
 
 }

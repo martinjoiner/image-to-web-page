@@ -2,12 +2,12 @@
 <h1>Convert an image file to a HTML web page</h1>
 
 
-<!-- TODO: This form will AJAX post to GET/markup -->
-<form class="generateInputs"  method="post">
+<!-- TODO: This form will AJAX post to POST/generate -->
+<form class="generateInputs" action="/POST/generate/" method="POST" enctype="multipart/form-data">
 	
 	<div class="row">
 		<label for="wording">Image file</label>
-		<input type="file">
+		<input type="file" name="imagefile">
 	</div>
 	<div class="row">
 

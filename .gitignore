@@ -1,1 +1,12 @@
 logs/*
+
+# Don't track vendor folder, let Composer build this for us
+vendor
+
+# Track the uploads folder, but not it's contents
+public_html/uploads/*
+!public_html/uploads/README.md
+
+# Track the generated folder, but not it's contents
+public_html/generated/*
+!public_html/generated/README.md

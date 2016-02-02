@@ -31,7 +31,11 @@
 	</main>
 
 	<footer>
-		<p class="moreBSW">A project by Martin Joiner (<a href="//twitter.com/martinjoiner">@MartinJoiner on Twitter</a>) | Part of <a href="http://butterscotchworld.co.uk/">butterscotchworld.co.uk</a></p> 
+		<p class="moreBSW">
+			A project by Martin Joiner, a <a href="http://martinjoiner.co.uk">full-stack developer in Bristol</a> 
+			(<a href="//twitter.com/martinjoiner">@MartinJoiner on Twitter</a>) | 
+			Part of <a href="http://butterscotchworld.co.uk/">butterscotchworld.co.uk</a>
+		</p> 
 	</footer>
 </body>
 </html>

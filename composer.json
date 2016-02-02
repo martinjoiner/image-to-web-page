@@ -1,2 +1,6 @@
 
-// TODO
+{
+    "autoload": {
+        "psr-4": {"ImageToWebPage\\": "src/"}
+    }
+}
