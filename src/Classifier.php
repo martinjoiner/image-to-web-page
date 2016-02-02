@@ -66,7 +66,7 @@ class Classifier{
 	/** 
 	 * Produces the CSS code
 	 *
-	 * @returns {string} CSS code
+	 * @return {string} CSS code
 	 */
 	public function writeCSS( $pixelWidth = 0 ){
 
