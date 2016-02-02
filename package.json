@@ -1,0 +1,28 @@
+{
+  "name": "pixels",
+  "version": "1.0.0",
+  "description": "![Alt text](/public_html/images/Pixels-Screen-Shot.jpg \"Sample image of generated web page\")",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-uglify": "^1.5.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martinjoiner/image-to-web-page.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/martinjoiner/image-to-web-page/issues"
+  },
+  "homepage": "https://github.com/martinjoiner/image-to-web-page"
+}

@@ -3,7 +3,7 @@
 
 
 <!-- TODO: This form will AJAX post to POST/generate -->
-<form class="generateInputs" action="/POST/generate/" method="POST" enctype="multipart/form-data">
+<form class="generateInputs" id="generate_form" action="#" method="POST" enctype="multipart/form-data">
 	
 	<div class="row">
 		<label for="wording">Image file</label>
@@ -46,3 +46,7 @@
 	</div>
 
 </form>
+
+<div id="reportDiv">
+
+</div>

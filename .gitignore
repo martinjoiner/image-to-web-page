@@ -1,5 +1,7 @@
 logs/*
 
+node_modules
+
 # Don't track vendor folder, let Composer build this for us
 vendor
 

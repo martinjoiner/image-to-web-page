@@ -37,5 +37,7 @@
 			Part of <a href="http://butterscotchworld.co.uk/">butterscotchworld.co.uk</a>
 		</p> 
 	</footer>
+
+	<script src="/js/all.min.js"></script>
 </body>
 </html>
