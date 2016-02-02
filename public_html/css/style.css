@@ -6,6 +6,12 @@ body{
 	font-size: 14px;
 }
 
+textarea{
+	font-size: inherit;
+	font-family: inherit;
+	display: block;
+}
+
 body *{
 	line-height: 1.6em;
 	box-sizing: border-box;
@@ -126,15 +132,51 @@ ul.lstExamples > li{
 
 .generateInputs label{
 	float: left;
+	width: 100px;
+	padding-top: 5px;
 	margin-right: 10px;
-}
-
-input, select{
-	padding: 0.4em;
+	text-align: right;
 }
 
 form .row{
 	margin-bottom: 10px;
+}
+
+input, 
+select,
+textarea{
+	padding: 0.4em;
+}
+
+input:invalid, 
+textarea:invalid{
+	border-color: red;
+}
+
+.wordingInput{
+	width: 260px;
+	height: 100px;
+}
+
+input[type=submit]{
+	padding: 0.8em 3em;
+	color: white;
+	border-radius: 2px;
+	border: none;
+	background-color: #861A1A;
+	transition: background-color .2s;
+	cursor: pointer;
+}
+
+form:invalid input[type=submit]{
+	background-color: #461414;
+	color: #AAA;
+	opacity: 0.9;
+	cursor: not-allowed;
+}
+
+input[type=submit]:hover{
+	background-color: #B72020;
 }
 
 

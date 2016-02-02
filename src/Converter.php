@@ -6,48 +6,80 @@ use ImageToWebPage\Classifier;
 
 Class Converter{
 
-
 	/**
-	 * The name of the source file
+	 * The name of the source file that was uploaded
+	 *
+	 * @type {string}
 	 */
 	private $originalFileName = '';
 
+
 	/**
-	 * Posterise determines how many groups we break colour spectrum into
+	 * Posterise determines how many groups we break color spectrum into
+	 *
+	 * @type {integer}
 	 */
 	private $numPosterise = 0;
 
+
 	/**
 	 * The message that will be repeated in the web page
+	 * 
+	 * @type {string}
 	 */
 	private $strWording = '';
 
-	var $numDesiredWindowWidth = 0;
-	var $numPixelWidth = 0;
 
+	/**
+	 * The total width of the resulting image
+	 *
+	 * @type {integer}
+	 */
+	private $image_width = 0;
+
+
+	/**
+	 * The width (and height; pixels are square) of the blocks that make up the image
+	 *
+	 * @type {integer}
+	 */
+	private $pixelWidth = 0;
+
+
+	/**
+	 * Array of pixels (HTML elements) that make up the resulting page
+	 *
+	 * @type {array}
+	 */
 	private $arrPixels = [];
 
+
+	/**
+	 * The classifier is used to build the library of CSS classes
+	 *
+	 * @type {object} Instance of Classifier class 
+	 */
 	private $classifier;
 
 
 
-	public function __construct( $strImageFilename, $numPosterise, $strWording, $numDesiredWindowWidth, $numPixelWidth ){
+	public function __construct( $strImageFilename, $numPosterise, $strWording, $image_width, $pixelWidth ){
 
 		$this->classifier = new Classifier();
 
 		$this->originalFileName = end( explode('/', $strImageFilename) );
 
-		$this->numPosterise 			= $numPosterise;
-		$this->strWording 				= $strWording;
-		$this->numDesiredWindowWidth 	= $numDesiredWindowWidth;
-		$this->numPixelWidth 			= $numPixelWidth;
+		$this->numPosterise 	= $numPosterise;
+		$this->strWording 		= $strWording;
+		$this->image_width 		= $image_width;
+		$this->pixelWidth 		= $pixelWidth;
 
 		$absoluteFilename = $strImageFilename;
 
 		list($width, $height, $type, $attr) = getimagesize( $absoluteFilename );
 
-		if( $width > ($this->numDesiredWindowWidth / $this->numPixelWidth) ){
-			$averagerange = round($width / ($this->numDesiredWindowWidth / $this->numPixelWidth));
+		if( $width > ($this->image_width / $this->pixelWidth) ){
+			$averagerange = round($width / ($this->image_width / $this->pixelWidth) );
 		} else {
 			$averagerange = 4;
 		}
@@ -75,7 +107,7 @@ Class Converter{
 					}
 				}
 				
-				// Calculate the average colour of that group
+				// Calculate the average color of that group
 				$totalr = 0;
 				$totalg = 0;
 				$totalb = 0;
@@ -126,6 +158,7 @@ Class Converter{
 				$hexg = dechex($green);
 				$hexb = dechex($blue);
 				
+				// Force the leading zeros to make it a CSS color code
 				if(strlen($hexr) == 1)
 					$hexr = "0".$hexr;
 				if(strlen($hexg) == 1)
@@ -133,19 +166,20 @@ Class Converter{
 				if(strlen($hexb) == 1)
 					$hexb = "0".$hexb;
 				
-				$skvPixel['col'] = $hexr . $hexg . $hexb;
-				$this->arrPixels[] = $skvPixel;
+				// Add this pixel object to the array
+				$this->arrPixels[] = [ 'color' => $hexr . $hexg . $hexb ];
 			}
 		}
 
 
-		$cnt = sizeof( $this->arrPixels );
-		for( $i = 0; $i < $cnt; $i++ ){
-			$this->arrPixels[$i]['class'] = $this->classifier->colorClass( $this->arrPixels[$i]['col'] );
+		// Iterate over the array of pixels, assigning their CSS class, based on their color
+		$iLimit = sizeof( $this->arrPixels );
+		for( $i = 0; $i < $iLimit; $i++ ){
+			$this->arrPixels[$i]['class'] = $this->classifier->colorClass( $this->arrPixels[$i]['color'] );
 		}
 
-		$this->numWindowWidth = $this->numPixelWidth * ceil($width / $averagerange);
-		$this->numWindowHeight = $this->numPixelWidth * ceil($height / $averagerange);
+		$this->numWindowWidth = $this->pixelWidth * ceil($width / $averagerange);
+		$this->numWindowHeight = $this->pixelWidth * ceil($height / $averagerange);
 
 	}
 
@@ -155,7 +189,7 @@ Class Converter{
 	/**
 	 * Produces the HTML markup
 	 *
-	 * @returns {string} HTML markup for the page
+	 * @return {string} HTML markup for the page
 	 */
 	private function writeHTML(){
 		$strHTML = '<div id="wrapper" style="width: ' . $this->numWindowWidth . 'px; height: ' . $this->numWindowHeight . 'px;">';
@@ -183,7 +217,7 @@ Class Converter{
 	 */
 	private function writeSourceCode(){
 		$sourceCode = '<!DOCTYPE html><html><head><style type="text/css">';
-		$sourceCode .= $this->classifier->writeCSS();
+		$sourceCode .= $this->classifier->writeCSS( $this->pixelWidth );
 		$sourceCode .= '</style></head><body><div class="wrapper">';
 		$sourceCode .= $this->writeHTML();
 		$sourceCode .= '</div></body></html>';
@@ -193,8 +227,9 @@ Class Converter{
 
 
 	/** 
-	 * Produces a filename for the HTML file based on the origin image
+	 * Produces a filename for the HTML file based on the filename of the origin image
 	 *
+	 * @return {string} .html Filename
 	 */
 	private function staticFilename(){
 		return preg_replace( '/(jpg|png)$/', 'html', $this->originalFileName );
@@ -208,18 +243,27 @@ Class Converter{
 	 * @param {string} $destinationFolder Destination folder relative to document root
 	 */
 	public function writeStaticPage( $destinationFolder = '/generated/' ){
-		$report = [ 'success'=>true, 'message'=>'', 'address'=>'' ];
+
+		$report = [ 'success' => true, 
+					'bytes_written' => 0, 
+					'message' => '', 
+					'address' => '' 
+				];
 
 		$fileContents = $this->writeSourceCode();
 
 		$report['address'] = $destinationFolder . $this->staticFilename();
 
-		$report['success'] = file_put_contents( $_SERVER['DOCUMENT_ROOT'] . $report['address'], $fileContents );
+		// Attempt to write the file
+		$report['bytes_written'] = file_put_contents( $_SERVER['DOCUMENT_ROOT'] . $report['address'], $fileContents );
 
-		if( $report['success'] ){
-			$report['message'] =  'HTML file written';
-		} else {
+		if( $report['bytes_written'] == false ){
+			$report['success'] = false;
 			$report['message'] =  'Failed to write HTML file';
+			$report['bytes_written'] = 0;
+		} else {
+			$report['success'] = true;
+			$report['message'] =  'HTML file written';
 		}
 
 		return $report;

@@ -1,19 +1,23 @@
 <?php
 
-header('Content-Type: application/json');
-
 /**
- Receives a form by POST, uploads the image file to 'uploads' folder, processes it using settings, 
- writes a single static HTML page to disk in 'generated' folder, returns a JSON object with success/fail message and url of generated file.
-*/
+ * Receives a form by POST, uploads the image file to 'uploads' folder, processes it using an instance of Converter, 
+ * Writes a single static HTML page to disk in 'generated' folder, returns a report as a JSON object.
+ */
+
+// Ensure only POST requests get served
+if( $_SERVER['REQUEST_METHOD'] != 'POST' ){
+	http_response_code(404);
+	throw new Exception('Invalid request');
+}
 
 // Include autoload
 require '../../../vendor/autoload.php';
 
 
-
-
+// Create a path and clean file name
 $uploadFile = $_SERVER['DOCUMENT_ROOT'] . '/uploads/' . preg_replace( '/[^A-Za-z0-9_.-]*/', '', basename($_FILES['imagefile']['name']) );
+
 
 // If the file is a jpg, move it to uploads
 if( preg_match( '/\.(jpg|jpeg|png)$/i', $uploadFile ) ){
@@ -26,12 +30,14 @@ if( preg_match( '/\.(jpg|jpeg|png)$/i', $uploadFile ) ){
 }
 
 
-
 use ImageToWebPage\Converter;
 
-$objMarkupImage = new Converter( $uploadFile, $_POST["posterise"], $_POST["wording"], $_POST["desiredwindowwidth"], $_POST["pixelwidth"]);
+$objMarkupImage = new Converter( $uploadFile, $_POST["posterise"], $_POST["wording"], $_POST["image_width"], $_POST["pixelwidth"] );
 
 $writePageReport = $objMarkupImage->writeStaticPage( '/generated/' );
 
-echo json_encode( $writePageReport );
+// Set header to JSON
+header('Content-Type: application/json');
 
+// Output report as JSON object
+echo json_encode( $writePageReport );

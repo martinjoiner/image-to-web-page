@@ -7,13 +7,14 @@
 	
 	<div class="row">
 		<label for="wording">Image file</label>
-		<input type="file" name="imagefile">
+		<input type="file" name="imagefile" required>
 	</div>
-	<div class="row">
 
+	<div class="row">
 		<label for="wording">Wording</label>
-		<input type="text" name="wording" id="wording" value="Over-exposure to images of unobtainable beauty may be warping our perception of reality. ">
+		<textarea class="wordingInput" type="text" name="wording" id="wording" required>Over-exposure to images of unobtainable beauty may be warping our perception of reality. </textarea>
 	</div>
+
 	<div class="row">
 
 		<label for="posterise">Posterise</label> 
@@ -28,21 +29,20 @@
 		</select>
 
 	</div>
+
 	<div class="row">
-
-		<label for="desiredwindowwidth">Window width</label> 
-		<input type="number" name="desiredwindowwidth" id="desiredwindowwidth" value="1200">
-
+		<label for="image_width">Image width</label> 
+		<input type="number" name="image_width" id="image_width" value="600" min="100" step="10" max="800">
 	</div>
-	<div class="row">
 
+	<div class="row">
 		<label for="pixelwidth">Pixel width</label> 
-		<input type="number" name="pixelwidth" id="pixelwidth" value="10">
-
+		<input type="number" name="pixelwidth" id="pixelwidth" value="10" min="1" max="50">
 	</div>
-	<div class="row">
 
+	<div class="row">
 		<label>&nbsp;</label>
-		<input type="submit" value="Create">
+		<input type="submit" value="Convert">
+	</div>
 
 </form>
