@@ -43,7 +43,7 @@
 					<ul>
 						<li>Body Builder</li>
 						<li>Boxer</li>
-						<li>Underwear Model</li>
+						<li><a href="/examples/Underwear-Model.html">Underwear Model</a></li>
 						<li>Skrillex</li>
 					</ul>
 				</li>
