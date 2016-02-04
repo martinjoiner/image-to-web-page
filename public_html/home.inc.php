@@ -1,9 +1,9 @@
 	<div class="row">
 		
-		<div class="col-half">
+		<div class="col-4">
 			&nbsp;
 		</div>
-		<div class="col-half">
+		<div class="col-6">
 
 			<h1>Pixels</h1>
 
