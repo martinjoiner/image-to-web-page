@@ -291,11 +291,18 @@ Class Converter{
 	 * @return {string} The produced source code
 	 */
 	private function writeSourceCode(){
-		$sourceCode = '<!DOCTYPE html><html><head><style type="text/css">';
+		$sourceCode  = "<!DOCTYPE html>\n<html>\n<head>\n";
+		$sourceCode .= "\t<title>" . $this->originalFileName . " converted to " . $this->staticFilename() . "</title>\n";
+
+		// Print last-modified meta tag in format: YYYY-MM-DD@hh:mm:ss TMZ
+		$sourceCode .= "\t<meta http-equiv=\"last-modified\" content=\"" . date('Y-m-d@H:i:s e') . "\" />\n";
+
+		$sourceCode .= "\t<style type=\"text/css\">\n";
 		$sourceCode .= $this->classifier->writeCSS( $this->pixelWidth );
-		$sourceCode .= '</style></head><body><div class="wrapper">';
+		$sourceCode .= "\n\t</style>\n</head>\n<body>\n\t";
+		$sourceCode .= '<div class="wrapper">';
 		$sourceCode .= $this->writeHTML();
-		$sourceCode .= '</div></body></html>';
+		$sourceCode .= "</div>\n\t</body>\n</html>";
 		return $sourceCode;
 	}
 
