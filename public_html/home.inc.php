@@ -41,7 +41,7 @@
 				<li>
 					<h3>Male Figure</h3>
 					<ul>
-						<li>Body Builder</li>
+						<li><a href="/examples/Body-Builder.html">Body Builder</a></li>
 						<li>Boxer</li>
 						<li><a href="/examples/Underwear-Model.html">Underwear Model</a></li>
 						<li>Skrillex</li>
