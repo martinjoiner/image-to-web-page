@@ -187,10 +187,13 @@ Class Converter{
 	}
 
 
+
 	/**
 	 * Turns a file into an image resource using the appropriate PHP function for the file type
 	 *
 	 * @param {string} $file File path
+	 *
+	 * @return {object} Image resource
 	 */
 	private function imageResouceFromFile( $file ){
 		$extension = strtolower(strrchr($file, '.'));
@@ -212,6 +215,7 @@ Class Converter{
 	    }
 
 	}
+
 
 
 	/**
