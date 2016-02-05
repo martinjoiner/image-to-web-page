@@ -34,6 +34,7 @@
 				<li>
 					<h3>Landscape</h3>
 					<ul>
+						<li><a href="/examples/Tree.html">Tree</a></li>
 						<li><a href="/examples/CPI.html">CPI.html</a></li>
 						<li><a href="/examples/Circular-Fields.html">Circular-Fields.html</a></li>
 					</ul>
