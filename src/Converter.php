@@ -78,56 +78,73 @@ Class Converter{
 	private $classifier;
 
 
+	/**
+	 * An associative array to store stats for profiling
+	 *
+	 * @type {array}
+	 */
+	private $stats = [];
+
+
 
 	/**
 	 * Constructor that does the conversion
 	 * 
-	 * @param {string} $strImageFilename The path of an image file
+	 * @param {string} $absoluteFilename The path of an image file
 	 * @param {integer} $numPosterise The level of posterisation
 	 * @param {string} $strWording The message that will be repeated in the web page
 	 * @param {integer} $image_width The total width (in CSS pixels) of the produced HTML image
-	 * @param {pixelWidth} $pixelWidth The width (in CSS pixels) of an individual HTML element
+	 * @param {integer} $pixelWidth The width (in CSS pixels) of an individual HTML element
 	 */
-	public function __construct( $strImageFilename, $numPosterise, $strWording, $image_width, $pixelWidth ){
+	public function __construct( $absoluteFilename, $numPosterise, $strWording, $image_width, $pixelWidth ){
+
+		$startTime = microtime(true);
+
+		// Build a stats object to 
+		$this->stats = [ 	'time' => null,
+							'sourcePixels' => null
+						];
 
 		$this->classifier = new Classifier();
 
-		$this->originalFileName = end( explode('/', $strImageFilename) );
+		$this->originalFileName = end( explode('/', $absoluteFilename) );
 
 		$this->numPosterise 	= $numPosterise;
 		$this->strWording 		= $strWording;
 		$this->image_width 		= $image_width;
 		$this->pixelWidth 		= $pixelWidth;
 
-		$absoluteFilename = $strImageFilename;
+		list($sourceImageWidth, $sourceImageHeight, $type, $attr) = getimagesize( $absoluteFilename );
 
-		list($sourceImageWidth, $height, $type, $attr) = getimagesize( $absoluteFilename );
+		$this->stats['sourcePixels'] = $sourceImageWidth * $sourceImageHeight;
 
 		// Discover how many pixels from the original source image we use to make an average colour for our HTML elements 
 		$numHorizontalElems = $this->image_width / $this->pixelWidth;
 		if( $sourceImageWidth > $numHorizontalElems ){
 			$averageRange = round( $sourceImageWidth / $numHorizontalElems );
 		} else {
+			// There are less pixels in a row of the source image than we need elements in our page
 			$averageRange = 4;
 		}
 
-		$im = imagecreatefromjpeg( $absoluteFilename );
+		$img = $this->imageResouceFromFile( $absoluteFilename );
 
 		// Iterate down the Y axis, incrementing by the range size each time
-		for($y = 0; $y < $height; $y = $y + $averageRange){
+		for($y = 0; $y < $sourceImageHeight; $y = $y + $averageRange){
 
 			for($x = 0; $x < $sourceImageWidth; $x = $x + $averageRange){	
 
-				unset($r);
-				unset($g);
-				unset($b);
+				// Define 3 arrays to hold all the color values of surrounding pixels
+				$r = [];
+				$g = [];
+				$b = [];
 				
-				// Build an array of all the pixels around the target one
+				// Build an array of all the pixels within the average range of this target one
 				for($y2 = $y; $y2 < $y+$averageRange; $y2++){
 
 					for($x2 = $x; $x2 < $x+$averageRange; $x2++){
 
-						$rgb = imagecolorat($im, $x2, $y2);
+						$rgb = imagecolorat($img, $x2, $y2);
 						
 						$r[] = ($rgb >> 16) & 0xFF;
 						$g[] = ($rgb >> 8) & 0xFF;
@@ -135,24 +152,15 @@ Class Converter{
 					}
 				}
 				
-				// Calculate the average color of that group
-				$totalr = 0;
-				$totalg = 0;
-				$totalb = 0;
-				for($i = 0; $i < sizeof($r); $i++){
-					$totalr = $totalr + $r[$i];
-					$totalg = $totalg + $g[$i];
-					$totalb = $totalb + $b[$i];
-				}
-				$totalaveraged = $averageRange * $averageRange;
-				$red = $totalr / $totalaveraged;
-				$green = $totalg / $totalaveraged;
-				$blue = $totalb / $totalaveraged;
+				// Calculate the average color of each color group
+				$red 	= array_sum( $r ) / count($r);
+				$green 	= array_sum( $g ) / count($g);
+				$blue 	= array_sum( $b ) / count($b);
 				
 				// Ensure values are within RGB friendly range
-				$red = $this->limitTo256Bit( $red );
-				$green = $this->limitTo256Bit( $green );
-				$blue = $this->limitTo256Bit( $blue );
+				$red 	= $this->limitTo256Bit( $red );
+				$green 	= $this->limitTo256Bit( $green );
+				$blue 	= $this->limitTo256Bit( $blue );
 				
 				// Posterise if required
 				if( $this->numPosterise ){
@@ -164,7 +172,6 @@ Class Converter{
 			}
 		}
 
-
 		// Iterate over the array of pixels, assigning their CSS class, based on their color
 		$iLimit = sizeof( $this->arrPixels );
 		for( $i = 0; $i < $iLimit; $i++ ){
@@ -172,10 +179,39 @@ Class Converter{
 		}
 
 		$this->wrapperWidth = $this->pixelWidth * ceil($sourceImageWidth / $averageRange);
-		$this->wrapperHeight = $this->pixelWidth * ceil($height / $averageRange);
+		$this->wrapperHeight = $this->pixelWidth * ceil($sourceImageHeight / $averageRange);
+
+		// Record processing time in stats array
+		$this->stats['time'] = microtime(true) - $startTime; 
 
 	}
 
+
+	/**
+	 * Turns a file into an image resource using the appropriate PHP function for the file type
+	 *
+	 * @param {string} $file File path
+	 */
+	private function imageResouceFromFile( $file ){
+		$extension = strtolower(strrchr($file, '.'));
+
+		switch ($extension) {
+	        case '.jpg':
+	        case '.jpeg':
+	            return @imagecreatefromjpeg($file);
+	            break;
+	        case '.gif':
+	            return @imagecreatefromgif($file);
+	            break;
+	        case '.png':
+	            return @imagecreatefrompng($file);
+	            break;
+	        default:
+	            return false;
+	            break;
+	    }
+
+	}
 
 
 	/**
@@ -299,10 +335,14 @@ Class Converter{
 
 		$sourceCode .= "\t<style type=\"text/css\">\n";
 		$sourceCode .= $this->classifier->writeCSS( $this->pixelWidth );
-		$sourceCode .= "\n\t</style>\n</head>\n<body>\n\t";
-		$sourceCode .= '<div class="wrapper">';
+		$sourceCode .= "\n\t</style>\n</head>\n<body>\n";
+		$sourceCode .= "\t<div class=\"wrapper\">\n";
 		$sourceCode .= $this->writeHTML();
-		$sourceCode .= "</div>\n\t</body>\n</html>";
+		$sourceCode .= "\t</div>\n";
+
+		// Debugging line (uncomment to price report)
+		//$sourceCode .= "\t<p style=\"color: white\"><strong>Source Pixels:</strong> " . $this->stats['sourcePixels'] . " | <strong>Process Time:</strong> " . $this->stats['time'] . "</p>\n";
+		$sourceCode .= "\t</body>\n</html>";
 		return $sourceCode;
 	}
 
